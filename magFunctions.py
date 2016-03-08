@@ -1,10 +1,11 @@
+#David Evans, Yard Mapper, March 8, 2016
 #!/usr/bin/python
 import smbus
 import time
 import math
 
-bus #bus for i2c
-address #address for device
+bus =  bus = smbus.SMBus(1)#Set the correct bus for i2c
+address = 0x1e #address for device
 
 #read_byte############################################################
 #reads contents in a register
@@ -48,8 +49,8 @@ def write_byte(adr, value):
 #Sets the magnetometer settings
 #Note: Currently default settings.  For different settings use magnetometer datasheet online
 def init_magnetometer():
-    bus = smbus.SMBus(1)#Set the correct bus
-    address = 0x1e #i2c address of the magnetometer
+    #bus = smbus.SMBus(1)#Set the correct bus
+    #address = 0x1e #i2c address of the magnetometer
 
     write_byte(0, 0b01110000) # Set to 8 samples @ 15Hz
     write_byte(1, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
@@ -62,13 +63,13 @@ def read_bearing():
     scale = 0.92 #Used to account for error
 
     #Scales the x and y input to the correct output
-	x_out = read_word_2c(3) * scale
-	y_out = read_word_2c(7) * scale
+    x_out = read_word_2c(3) * scale
+    y_out = read_word_2c(7) * scale
 
     #Produces the corrent bearing in radians
-	bearing  = math.atan2(y_out, x_out)#Output angle in radians from -pi to pi
-	if (bearing < 0): #If angle is less than zero, add 2pi to to make angle positive
-    		bearing += 2 * math.pi
+    bearing  = math.atan2(y_out, x_out)#Output angle in radians from -pi to pi
+    if (bearing < 0): #If angle is less than zero, add 2pi to to make angle positive
+        bearing += 2 * math.pi
 
 
     bearingDeg = math.degrees(bearing) #Convert angle to degrees

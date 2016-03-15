@@ -118,8 +118,6 @@ def parse_events(sock, loop_count=100):
 
     old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
 
-    print "1"
-    print datetime.datetime.now() - time
     # perform a device inquiry on bluetooth device #0
     # The inquiry should last 8 * 1.28 = 10.24 seconds
     # before the inquiry is performed, bluez should flush its cache of
@@ -131,14 +129,18 @@ def parse_events(sock, loop_count=100):
     done = False
     results = []
     myFullList = []
-    print "2"
-    print datetime.datetime.now() - time
+    print "Init time"
+    print datetime.datetime.now()-time
     for i in range(0, loop_count):
-        print "loop start"
-        print i
-        print datetime.datetime.now() - time
+        time3 = datetime.datetime.now()
         pkt = sock.recv(255)
-        ptype, event, plen = struct.unpack("BBB", pkt[:3])
+        print "Pkt Time"
+        print datetime.datetime.now()-time3
+
+        time3 = datetime.datetime.now()
+	ptype, event, plen = struct.unpack("BBB", pkt[:3])
+        print "Struct Unpack time"
+	print datetime.datetime.now()-time3
         #print "--------------" 
         if event == bluez.EVT_INQUIRY_RESULT_WITH_RSSI:
 		i =0
@@ -156,7 +158,7 @@ def parse_events(sock, loop_count=100):
                 num_reports = struct.unpack("B", pkt[0])[0]
                 report_pkt_offset = 0
                 for i in range(0, num_reports):
-		
+		    
 		    if (DEBUG == True):
 			print "-------------"
                     	#print "\tfullpacket: ", printpacket(pkt)
@@ -171,6 +173,7 @@ def parse_events(sock, loop_count=100):
                     	rssi, = struct.unpack("b", pkt[report_pkt_offset -1])
                     	print "\tRSSI:", rssi
 		    # build the return string
+                    time2 = datetime.datetime.now()
                     Adstring = packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
 		    Adstring += ","
 		    Adstring += returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6]) 
@@ -182,18 +185,24 @@ def parse_events(sock, loop_count=100):
 		    Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -2])
 		    Adstring += ","
 		    Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -1])
-
-            print "loop end"
-            print i
-            print datetime.datetime.now() - time
+                    print "Internal Iteration Time"
+                    print i
+                    print datetime.datetime.now() - time2
 
 		    #print "\tAdstring=", Adstring
- 		    myFullList.append(Adstring)
-                done = True
+            myFullList.append(Adstring)
+            done = True
+        print "Iteration Time"
+        print i
+        print datetime.datetime.now() - time3
+
+    time1 = datetime.datetime.now()
+
     sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, old_filter )
 
-    print "end"
-    print i
+    print "Sockopt time"
+    print datetime.datetime.now() - time1
+    print "total time"
     print datetime.datetime.now() - time
     return myFullList
 

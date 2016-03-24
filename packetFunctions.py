@@ -1,0 +1,1 @@
+#Goal of this class is to provide functions

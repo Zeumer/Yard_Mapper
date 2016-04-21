@@ -5,6 +5,10 @@ import time
 
 magFunctions.init_magnetometer()#You must run this before running magnetometer
 
+print magFunctions.read_bearing() 
+
+time.sleep(1)
+
 while(True):
 	bearing = magFunctions.read_bearing() #get the magnetometer bearing
 

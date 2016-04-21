@@ -55,16 +55,21 @@ def init_magnetometer():
     write_byte(0, 0b01110000) # Set to 8 samples @ 15Hz
     write_byte(1, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
     write_byte(2, 0b00000000) # Continuous sampling
-
+    print "I'm here"
 #read_bearing###########################################################
 #Reads the direction the magnetometer is facing
 #Return: Magnetometer bearing in degrees (Do no know what reference is)
 def read_bearing():
-    scale = 0.92 #Used to account for error
+    scale = 1 #Used to account for error
 
     #Scales the x and y input to the correct output
     x_out = read_word_2c(3) * scale
     y_out = read_word_2c(7) * scale
+    z_out = read_word_2c(5) * scale    
+
+    print x_out
+    print y_out
+    print z_out
 
     #Produces the corrent bearing in radians
     bearing  = math.atan2(y_out, x_out)#Output angle in radians from -pi to pi

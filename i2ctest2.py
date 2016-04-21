@@ -38,7 +38,7 @@ while True:
 	x_out = read_word_2c(3) * scale
 	y_out = read_word_2c(7) * scale
 	z_out = read_word_2c(5) * scale
-
+	print read_byte(2)
 	bearing  = math.atan2(y_out, x_out) 
 	if (bearing < 0):
     		bearing += 2 * math.pi

@@ -9,13 +9,14 @@ import select
 import struct
 import time
 import bluetooth._bluetooth as bluez
+import packetFunctions
 
-dev_id = [0, 1, 2]
+dev_id = [0]
 
 socketList = []
-beaconList = []
+# beaconList = []
 
-socketsPerPort = 2
+socketsPerPort = 5
 #le = open('logfile', 'w')
 
 
@@ -32,8 +33,14 @@ def createSocket(port_id):
 		blescan.hci_le_set_scan_parameters(sock)
 		blescan.hci_enable_le_scan(sock)
 		old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+#		print "Bluez hci filter:", bluez.HCI_FILTER
+#		print "Old filter", old_filter, "end"
 		flt = bluez.hci_filter_new()
+#		print "New filter", flt, "end"
+#		bluez.hci_filter_set_event(bluez.SCAN_RSP)
 		bluez.hci_filter_all_events(flt)
+#		print "All events", flt, "end"
+#		printpacket(flt)
 		bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
                 sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, flt )
 
@@ -54,25 +61,38 @@ def closeAllSockets():
 	print "After delete ",socketList
 
 def inBeaconList(beaconList, beacon):
-	beaconUUID = getUUID(beacon)
-	for i in range(0, len(beaconList):
-		if beaconUUID == beaconList[i].getUUID()
+	beaconUUID = packetFunctions.getUUID(beacon)
+	for i in range(0, len(beaconList)):
+		if beaconUUID == packetFunctions.getUUID(beaconList[i]):
 			return True;
 	return False
 
 def initBluetoothSearching():
 	createAllSockets()
-	for i in range(0, len(dev_id))
-		beaconList.append([])
+#	for i in range(0, len(dev_id)):
+#		beaconList.append([])
+
+def printpacket(pkt):
+    for c in pkt:
+        sys.stdout.write("%02x " % struct.unpack("B",c)[0])
+
+#def newMultiDimArray():
+#    for i in range(0, len(dev_id)):
+#        beaconList.append([])
+    
 
 
 def getBeacons():
 
+        beaconList = []
+
+        for i in range(0, len(dev_id)):
+	        beaconList.append([])
 
 #	createAllSockets()
 	
 #	phread, phwrite, pherror = select.select(test, [], [], 60)
-	ready_to_read, ready_to_write, in_error = select.select(test, [], [], 60)
+	ready_to_read, ready_to_write, in_error = select.select(socketList, [], [], 60)
 	
 #	while ready_to_read[i].recv(255) == 0:
  #                       print "In loop"
@@ -82,14 +102,17 @@ def getBeacons():
 	for i in range(0, len(ready_to_read)):
 		port = ready_to_read[i].getsockname()
 		pkt = ready_to_read[i].recv(255)
-	
-		beacon = pktToString(pkt)
-		
-		if inBeaconList(beaconList[port], beacon) == False
-			beaconList[port].append(beacon)
+	        if (len(pkt) == 45):
+#                	print "\tfullpacket: ", printpacket(pkt)
+			beacon = packetFunctions.pktToString(pkt)
+#                	print beacon
+#			print port		
+			if inBeaconList(beaconList[port], beacon) == False:
+				beaconList[port].append(beacon)
+
 
 	return beaconList
-
+        
 
  #   	closeAllSockets()
  #   	time.sleep(.1)
